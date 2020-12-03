@@ -22,7 +22,6 @@ class Toboggan:
             hits += self.hit_tree()
         return hits
 
-
 if __name__ == '__main__':
     map_data = open("input.txt", "r").readlines()
     sled = Toboggan(map_data)
