@@ -1,6 +1,7 @@
-def check_field(name, value):
+def check_field(field):
+    name, value = field
     try:
-        return funcs[name](value)
+        return field_funcs[name](value)
     except:
         return False
 
@@ -16,11 +17,7 @@ def check_eyr(value):
 def check_hgt(value):
     height = int(value[:-2])
     units = value[-2:]
-    if units == "cm":
-        return 150 <= height <= 193
-    if units == "in":
-        return 59 <= height <= 76
-    return False
+    return (150 <= height <= 193) if units == "cm" else (59 <= height <= 76) if units == "in" else False
 
 def check_hcl(value):
     red = 0 <= int(value[1:2],16) <= 255
@@ -35,22 +32,14 @@ def check_pid(value):
     return len(value)==9 and (0 <= int(value) <= 999999999)
 
 def valid(passport):
-    valid = funcs.keys()
-    fields = passport.split()
-    count = 0
-    for field in fields:
-        name,value = field.split(":")
-        if name in valid:
-            count += check_field(name,value)
-    return (count >= len(valid))
+    valid = field_funcs.keys()
+    fields = [(name, value) for name, value in [field.split(":") for field in passport.split()] if name in valid]
+    return sum(map(check_field,fields)) >= len(valid)
 
 def total_valid(passports):
-    total = 0
-    for passport in passports.split("\n\n"):
-        total += valid(passport)
-    return total
+    return sum(map(valid, passports.split("\n\n")))
 
-funcs = {
+field_funcs = {
     "byr": check_byr,
     "iyr": check_iyr,
     "eyr": check_eyr,
