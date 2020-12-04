@@ -17,8 +17,8 @@ def check_eyr(value):
 def check_hgt(value):
     height = int(value[:-2])
     units = value[-2:]
-    return (150 <= height <= 193) if units == "cm" else (59 <= height <= 76) if units == "in" else False
-
+    return (units == "cm" and (150 <= height <= 193)) or (units == "in" and (59 <= height <= 76))
+    
 def check_hcl(value):
     red = 0 <= int(value[1:2],16) <= 255
     green = 0 <= int(value[3:4],16) <= 255
