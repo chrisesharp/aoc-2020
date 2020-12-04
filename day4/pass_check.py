@@ -1,9 +1,7 @@
 def check_field(field):
     name, value = field
-    try:
-        return field_funcs[name](value)
-    except:
-        return False
+    try: return field_funcs[name](value) 
+    except: return False
 
 def check_byr(value):
     return len(value) == 4 and int(value) >= 1920 and int(value) <= 2002
@@ -18,7 +16,7 @@ def check_hgt(value):
     height = int(value[:-2])
     units = value[-2:]
     return (units == "cm" and (150 <= height <= 193)) or (units == "in" and (59 <= height <= 76))
-    
+
 def check_hcl(value):
     red = 0 <= int(value[1:2],16) <= 255
     green = 0 <= int(value[3:4],16) <= 255
