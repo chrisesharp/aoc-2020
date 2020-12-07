@@ -3,27 +3,23 @@ import re
 class Parser:
     def __init__(self, data):
         self.bags = {}
+        self.parse(data)
+    
+    def parse(self, data):
         for rule in data:
             tokens = self.tokenize(rule)
             holder = tokens.pop(0)
             dependents = self.bags.get(holder,set())
             for token in tokens:
-                token = token.strip()
-                if token != '':
+                if token := token.strip():
                     dependents.add(token)
             self.bags[holder] = dependents
-        
 
     def tokenize(self, rule):
-        return re.split((" bags contain | bag[s]*[.,]*[ ]*"), rule)
+        return re.split((" bags contain | bag[s., ]*"), rule)
     
     def containers(self, target_bag):
-        results = set()
-        for bag, holds in self.bags.items():
-            for container in holds:
-                if target_bag in container:
-                    results.add(bag)
-        return results
+        return set([bag for bag in self.bags for container in self.bags[bag] if target_bag in container])
     
     def all_containers(self, target_bag):
         results = set()
@@ -31,23 +27,18 @@ class Parser:
         while bags:
             bag = bags.pop()
             results.add(bag)
-            for new_bag in self.containers(bag):
-                if new_bag not in results:
-                    bags.add(new_bag)
+            bags |= set([new_bag for new_bag in self.containers(bag) if new_bag not in results])
         return results
     
-    def contains(self, holding_bag):
-        contents = list(self.bags.get(holding_bag,set()))
+    def contains(self, container):
         count = 0
+        contents = list(self.bags.get(container, set()))
         while contents:
             bag = contents.pop()
             num, bag = re.split((" "), bag, 1)
-            if num != "no" and int(num) > 0:
-                num = int(num)
+            if num != "no" and (num := int(num)):
                 count += num
-                for i in range(num):
-                    for new_bag in self.bags.get(bag, set()):
-                        contents.append(new_bag)
+                contents += [new_bag for new_bag in self.bags.get(bag, set())]*num
         return count
     
 if __name__ == '__main__':
