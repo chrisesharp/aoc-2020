@@ -4,57 +4,64 @@ def decode(instruction):
 class CPU:
     def __init__(self, code = []):
         self.mem = self.load(code)
+        self.end = len(self.mem)
         self.reset()
+        self.opcode = {
+            "nop": self.op_nop,
+            "jmp": self.op_jmp,
+            "acc": self.op_acc
+        }
+    
+    def op_nop(self, parm):
+        self.pc += 1
+    
+    def op_jmp(self, parm):
+        self.pc += int(parm)
+    
+    def op_acc(self, parm):
+        self.acc += int(parm)
+        self.pc += 1
     
     def reset(self):
         self.pc = 0
         self.acc = 0
-        for i in range(self.end):
-            self.mem[i]['dirty'] = False
+        self.dirty = [False] * self.end
     
     def load(self, code):
         mem = {}
         for i in range(len(code)):
             (op, parms) = decode(code[i])
             mem[i] = {"op":op,"parms":parms}
-        self.end = i
         return mem
     
     def next(self):
-        if self.pc == self.end:
-            return False
-        if instruction := self.mem.get(self.pc, False):
+        if self.pc != self.end and (instruction := self.mem.get(self.pc, False)):
             return self.execute(instruction)
-        return False
 
     def execute(self, instruction):
-        (op, parm, dirty) = instruction.values()
-        if dirty:
-            return False
-        self.mem[self.pc]['dirty']=True
-        if op == "acc":
-            self.acc += int(parm)
-            self.pc += 1
-        elif op == "jmp":
-            self.pc += int(parm)
-        else:
-            self.pc += 1
-        return True
+        (op, parm) = instruction.values()
+        if not self.dirty[self.pc]:
+            self.dirty[self.pc] = True
+            self.opcode[op](parm)
+            return True
     
     def run(self):
-        while self.next(): pass
+        while self.next(): continue
         return self.acc
 
     def run_with_mod(self):
         for i in range(self.end):
-            if self.mem[i]['op'] != 'jmp':
-                continue
-            self.mem[i]['op'] = "nop"
-            while self.next():
-                if self.pc == self.end:
+            if self.mem[i]['op'] == 'jmp':
+                if self.mutate_finishes(i,"nop"):
                     return self.acc
-            self.mem[i]['op'] = "jmp"
-            self.reset()
+                self.reset()
+    
+    def mutate_finishes(self, location, op):
+        orig = self.mem[location]['op']
+        self.mem[location]['op'] = op
+        self.run()
+        self.mem[location]['op'] = orig
+        return self.pc == self.end
 
 if __name__ == '__main__':
     data = open("input.txt","r").readlines()
