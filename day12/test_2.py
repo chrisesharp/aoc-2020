@@ -1,5 +1,5 @@
 import unittest
-from ferry import Ferry, Dir
+from ferry import Ferry2, Dir
 
 class GameTest(unittest.TestCase):
     def test_move(self):
@@ -9,7 +9,7 @@ F7
 R90
 F11"""
         instructions = data.splitlines()
-        ferry = Ferry(instructions, True)
+        ferry = Ferry2(instructions)
         (pos, facing) = ferry.move()
         self.assertEqual((100,-10), pos)
         self.assertEqual(Dir.E, facing)
