@@ -18,17 +18,19 @@ translations = {
     Dir.N: (0,-1)
 }
 
+def rotation(turn, size):
+    return turn.value * int(size / 90)
+
 def distance(a, b):
     (x1,y1) = a
     (x2,y2) = b
     return abs(x1-x2) + abs(y1-y2)
 
 def translate(orig, direction, dist):
-    (dx,dy) = translations[direction]
+    (dx,dy) = direction
     (x,y) = orig
-    for i in range(dist):
-        x += dx
-        y += dy
+    x += dx * dist
+    y += dy * dist
     return (x,y)
 
 class Ferry:
@@ -39,62 +41,43 @@ class Ferry:
         self.pos = self.orig = (0,0)
         self.part2 = part2
 
-    def translate(self, origin, direction, dist):
-        (dx,dy) = translations[direction]
-        (x,y) = origin
-        for i in range(dist):
-            x += dx
-            y += dy
-        return (x,y)
-
     def move(self):
         instruction = self.instructions.pop(0)
         letter = instruction[0]
         size = int(instruction[1:])
         if letter in ['L','R','F']:
-            letter = Turn[letter]
+            turn = Turn[letter]
             if self.part2:
-                if letter in [Turn.L, Turn.R]:
-                    self.turn_waypoint(letter, size)
+                if turn.value:
+                    self.turn_waypoint(turn, size)
                 else:
-                    self.move_to_waypoint(size)
+                    self.move_ship(self.waypoint,size)
             else:
-                if letter in [Turn.L, Turn.R]:
-                    self.turn_ship(letter, size)
+                if turn.value:
+                    self.turn_ship(turn, size)
                 else:
-                    self.move_ship(size)
+                    self.move_ship(translations[self.dir],size)
         else:
-            letter = Dir[letter]
+            direction = Dir[letter]
             if self.part2:
-                self.waypoint = translate(self.waypoint, letter, size)
+                self.waypoint = translate(self.waypoint, translations[direction], size)
             else:
-                self.pos = translate(self.pos, letter, size)
+                self.pos = translate(self.pos, translations[direction], size)
         return self.pos, self.dir
 
-    def turn_ship(self, letter, size):
-        turn = letter.value * int(size / 90)
+    def turn_ship(self, turn, size):
+        turn = rotation(turn, size)
         self.dir = Dir((self.dir.value + turn + 4)%4)
     
-    def turn_waypoint(self, letter, size):
+    def turn_waypoint(self, turn, size):
         x, y = self.waypoint
-        turn = letter.value * int(size / 90)
+        turn = rotation(turn, size)
         for i in range(abs(turn)):
-            if turn > 0:
-                (x,y) = (-y,x)
-            else:
-                (x,y) = (y, -x)
+            (x,y) = (-y,x) if turn > 0 else (y, -x)
         self.waypoint = (x,y)
     
-    def move_ship(self, size):
-        self.pos = self.translate(self.pos, self.dir, size)
-
-    def move_to_waypoint(self, size):
-        dx,dy = self.waypoint
-        x,y = self.pos
-        for i in range(size):
-            x += dx
-            y += dy
-        self.pos = (x,y)
+    def move_ship(self, delta, size):
+        self.pos = translate(self.pos, delta, size)
 
     def travel(self):
         while self.instructions:
