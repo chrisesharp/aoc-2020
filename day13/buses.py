@@ -1,7 +1,8 @@
 def get_wait(notes):
     earliest = int(notes[0])
     buses = list(map(int,notes[1].replace('x,','').split(',')))
-    for time in range(earliest,earliest*10):
+    latest = max(buses)
+    for time in range(earliest, earliest + latest):
         for bus in buses:
             if time % bus == 0:
                 return (time - earliest) * bus
