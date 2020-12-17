@@ -27,7 +27,7 @@ class GameTest(unittest.TestCase):
         data = """.#.
 ..#
 ###"""
-        game = Game(get_cells(data.splitlines(),True),True)
+        game = Game(get_cells(data.splitlines(),True))
         game.generate()
         self.assertEqual(29, len(game.alive))
         # game.generate()
