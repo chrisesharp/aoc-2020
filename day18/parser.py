@@ -62,9 +62,9 @@ class Parser:
         return ast
 
     def parse_expr(self, tokens):
-        return self.parse_rest(tokens, self.parse_node(tokens))
+        return self.parse_rest(tokens, self.parse_node(tokens), [TokenType.T_PLUS, TokenType.T_MULT])
 
-    def parse_rest(self, tokens, left_node, operators=[TokenType.T_PLUS, TokenType.T_MULT]):
+    def parse_rest(self, tokens, left_node, operators):
         operators = set(operators)
         if tokens[0].token_type in operators:
             node = tokens.pop(0)
@@ -89,9 +89,9 @@ class Parser2(Parser):
         return self.parse_rest(tokens, self.parse_precedence(tokens), [TokenType.T_MULT])
 
     def parse_precedence(self, tokens):
-        return self.parse_plus(tokens, self.parse_node(tokens))
+        return self.parse_plus(tokens, self.parse_node(tokens), [TokenType.T_PLUS])
 
-    def parse_plus(self, tokens, left_node, operators=[TokenType.T_PLUS]):
+    def parse_plus(self, tokens, left_node, operators):
         operators = set(operators)
         if tokens[0].token_type in [TokenType.T_PLUS]:
             node = tokens.pop(0)
