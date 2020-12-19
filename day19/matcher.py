@@ -3,7 +3,7 @@ import re
 class Matcher:
     def __init__(self, data):
         self.data = data
-        self.rules = { int(n): r for n,r in re.findall('(\d+)\:(.+)\n', data.replace('"', '')) }
+        self.rules = { int(n): r for n,r in re.findall(r'(\d+)\:(.+)\n', data.replace('"', '')) }
     
     def rr(self, n):
         new_rule = '|'.join([''.join([self.rr(int(c)) if c.isdigit() else c for c in r.split()]) for r in self.rules[n].split('|')]) 
